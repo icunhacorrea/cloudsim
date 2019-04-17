@@ -347,9 +347,38 @@ public class DatacenterBroker extends SimEntity {
 	 * @post $none
          * @see #submitCloudletList(java.util.List) 
 	 */
+
+	/** 
+	 * Todo: Alterar este método para destinar cloudlets densas
+	 * para VMs com mais recursos.
+	 *
+	 */
 	protected void submitCloudlets() {
 		int vmIndex = 0;
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
+		
+
+		/**
+		 * Novo laço responsável por remeter clodlets densas apenas a
+		 * Vms que detenham mais recursos.
+		 *
+		 *
+		 */
+
+		/*for (Cloudlet cloudlet : getCloudletList()) {
+			Vm vm;
+
+			if (cloudlet.getVmId() == -1) {
+				cLength = cloudlet.getCloudletTotalLength();
+
+
+
+
+			} else  {
+
+			}
+		}*/
+
 		for (Cloudlet cloudlet : getCloudletList()) {
 			Vm vm;
 			// if user didn't bind this cloudlet and it has not been executed yet
@@ -657,6 +686,17 @@ public class DatacenterBroker extends SimEntity {
 	 */
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
+	}
+
+	/**
+	 * Gets the size in MIPS of all Vms	
+	 */
+	protected List<Double> getSizeOfAllVms() {
+		List<Double> vmSizes = new ArrayList<Double>();
+		for (Vm vm : getVmsCreatedList()) {
+			vmSizes.add(vm.getMips());
+		}
+		return vmSizes;
 	}
 
 }
