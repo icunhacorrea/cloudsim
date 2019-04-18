@@ -355,8 +355,17 @@ public class DatacenterBroker extends SimEntity {
 	 */
 	protected void submitCloudlets() {
 		int vmIndex = 0;
-		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
+		int groupLow = 0;
+		int groupTop = 0;
 		
+		double minCLength = minCloudletLength();
+		double maxClength = maxCloudletLength();
+		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
+		double interval = (maxClength - minCLength) / getVmsCreatedList().size();
+
+		for (int i = 1; i < getVmsCreatedList().size() + 1, i++) {
+			
+		}
 
 		/**
 		 * Novo laço responsável por remeter clodlets densas apenas a
@@ -365,19 +374,20 @@ public class DatacenterBroker extends SimEntity {
 		 *
 		 */
 
-		/*for (Cloudlet cloudlet : getCloudletList()) {
+		for (Cloudlet cloudlet : getCloudletList()) {
 			Vm vm;
-
+			// Se a cloudlet ainda não foi direcionada para nenhuma vm...
+			// Procurar a VM que se adeque ao intervalo que a Cloudlet pertence.
 			if (cloudlet.getVmId() == -1) {
 				cLength = cloudlet.getCloudletTotalLength();
 
 
 
 
-			} else  {
+			} else {
 
 			}
-		}*/
+		}
 
 		for (Cloudlet cloudlet : getCloudletList()) {
 			Vm vm;
@@ -690,13 +700,48 @@ public class DatacenterBroker extends SimEntity {
 
 	/**
 	 * Gets the size in MIPS of all Vms	
-	 */
 	protected List<Double> getSizeOfAllVms() {
 		List<Double> vmSizes = new ArrayList<Double>();
 		for (Vm vm : getVmsCreatedList()) {
 			vmSizes.add(vm.getMips());
 		}
 		return vmSizes;
+	}
+
+	protected Int idOfBestVmForCloudlet(long cLength) {
+		Int vmId = -1;
+		long tmp = -1;
+		long aux = -1;
+		for (Vm vm : getVmsCreatedList()) {
+			cLength - (long) vm.getMips;
+		}
+
+
+		return 0;
+	}*/
+
+	protected double maxCloudletLength() {
+		double max = -1;
+		double aux = 0;
+
+		for (Cloudlet cloudlet : getCloudletList()) {
+			aux = cloudlet.getCloudletTotalLength();
+			if (aux > max)
+				max = aux;
+		}
+		return max;
+	}
+
+	protected double minCloudletLength() {
+		double min = Double.MAX_VALUE;
+		double aux = 0;
+
+		for (Cloudlet cloudlet : getCloudletList()) {
+			aux = cloudlet.getCloudletTotalLength();
+			if (aux < min)
+				min = aux;
+		}
+		return min;
 	}
 
 }
