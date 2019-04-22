@@ -1,0 +1,18 @@
+# Create by icunhacorrea
+
+### projects ###
+.project
+*.projects
+
+### settings ###
+*.settings
+
+### classpath ###
+
+*.classpath
+
+### targets ###
+documentation/target/
+modules/cloudsim-examples/target/
+modules/cloudsim/target/
+

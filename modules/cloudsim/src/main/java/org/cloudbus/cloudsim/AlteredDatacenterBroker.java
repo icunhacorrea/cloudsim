@@ -29,7 +29,7 @@ import org.cloudbus.cloudsim.lists.VmList;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class DatacenterBroker extends SimEntity {
+public class AlteredDatacenterBroker extends SimEntity {
 
 	/** The list of VMs submitted to be managed by the broker. */
 	protected List<? extends Vm> vmList;
@@ -83,7 +83,7 @@ public class DatacenterBroker extends SimEntity {
 	 * @pre name != null
 	 * @post $none
 	 */
-	public DatacenterBroker(String name) throws Exception {
+	public AlteredDatacenterBroker(String name) throws Exception {
 		super(name);
 
 		setVmList(new ArrayList<Vm>());
@@ -347,9 +347,48 @@ public class DatacenterBroker extends SimEntity {
 	 * @post $none
          * @see #submitCloudletList(java.util.List) 
 	 */
+
+	/** 
+	 * Todo: Alterar este método para destinar cloudlets densas
+	 * para VMs com mais recursos.
+	 *
+	 */
 	protected void submitCloudlets() {
 		int vmIndex = 0;
+		int groupLow = 0;
+		int groupTop = 0;
+		
+		double minCLength = minCloudletLength();
+		double maxClength = maxCloudletLength();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
+		double interval = (maxClength - minCLength) / getVmsCreatedList().size();
+
+		/*for (int i = 1; i < getVmsCreatedList().size() + 1, i++) {
+			
+		}*/
+
+		/**
+		 * Novo laço responsável por remeter clodlets densas apenas a
+		 * Vms que detenham mais recursos.
+		 *
+		 *
+		 */
+
+		/*for (Cloudlet cloudlet : getCloudletList()) {
+			Vm vm;
+			// Se a cloudlet ainda não foi direcionada para nenhuma vm...
+			// Procurar a VM que se adeque ao intervalo que a Cloudlet pertence.
+			if (cloudlet.getVmId() == -1) {
+				cLength = cloudlet.getCloudletTotalLength();
+
+
+
+
+			} else {
+
+			}
+		}*/
+
 		for (Cloudlet cloudlet : getCloudletList()) {
 			Vm vm;
 			// if user didn't bind this cloudlet and it has not been executed yet
@@ -657,6 +696,52 @@ public class DatacenterBroker extends SimEntity {
 	 */
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
+	}
+
+	/**
+	 * Gets the size in MIPS of all Vms	
+	protected List<Double> getSizeOfAllVms() {
+		List<Double> vmSizes = new ArrayList<Double>();
+		for (Vm vm : getVmsCreatedList()) {
+			vmSizes.add(vm.getMips());
+		}
+		return vmSizes;
+	}
+
+	protected Int idOfBestVmForCloudlet(long cLength) {
+		Int vmId = -1;
+		long tmp = -1;
+		long aux = -1;
+		for (Vm vm : getVmsCreatedList()) {
+			cLength - (long) vm.getMips;
+		}
+
+
+		return 0;
+	}*/
+
+	protected double maxCloudletLength() {
+		double max = -1;
+		double aux = 0;
+
+		for (Cloudlet cloudlet : getCloudletList()) {
+			aux = cloudlet.getCloudletTotalLength();
+			if (aux > max)
+				max = aux;
+		}
+		return max;
+	}
+
+	protected double minCloudletLength() {
+		double min = Double.MAX_VALUE;
+		double aux = 0;
+
+		for (Cloudlet cloudlet : getCloudletList()) {
+			aux = cloudlet.getCloudletTotalLength();
+			if (aux < min)
+				min = aux;
+		}
+		return min;
 	}
 
 }
