@@ -76,6 +76,12 @@ public class DatacenterBrokerLB extends SimEntity {
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
 
 	/**
+	 * Objeto para auxiliar no balanceamento de carga.
+	 * @param name
+	 * @throws Exception
+	 */
+
+	/**
 	 * Created a new DatacenterBroker object.
 	 * 
 	 * @param name name to be associated with this entity (as required by {@link SimEntity} class)
@@ -101,6 +107,7 @@ public class DatacenterBrokerLB extends SimEntity {
 		setDatacenterRequestedIdsList(new ArrayList<Integer>());
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
+
 	}
 
 	/**
@@ -343,14 +350,74 @@ public class DatacenterBrokerLB extends SimEntity {
 	/**
 	 * Submit cloudlets to the created VMs.
 	 * 
+	 * Método responsável por destinar as cloudlets à VMs.
+	 * Por default, este método destina cloudlets utilizando uma política 
+	 * baseada em um algoritmo circular (RR) onde a lista de VMs é percorrida
+	 * na medida em que se destina CLs para VMs. Ao final da fila, ela
+	 * retorna ao primeiro elemento da mesma.
+	 * 
+	 * A alteração neste método consiste na condução de cloudlets para a mesma
+	 * VMs até que a sua carga de trabalho atingao limite definido pela sua 
+	 * "proporção de força" no datacenter. 
+	 * 
 	 * @pre $none
 	 * @post $none
          * @see #submitCloudletList(java.util.List) 
 	 */
+
 	protected void submitCloudlets() {
+		List<Cloudlet> cloudlets = getCloudletList();
+		List<Vm> vms = getVmsCreatedList();
+		CapacityLoadBalancer loadBalancer = new CapacityLoadBalancer(cloudlets, vms);
+
+		Map<Integer, Double> workloadPerVm = loadBalancer.findVmProcessLimit();
+
+		for (Vm vm : getVmsCreatedList()) {
+			if (!Log.isDisabled()) {
+				Log.printConcatLine("VM: ", vm.getId(), " capacity limit is:",
+					workloadPerVm.get(vm.getId()));
+			}			
+		}
+
 		int vmIndex = 0;
+		long totalClsLength = loadBalancer.getTotalLengthOfCloudlets();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
-		for (Cloudlet cloudlet : getCloudletList()) {
+		long vmAtualLoad = 0;
+		
+		for (Cloudlet cl : cloudlets) {
+			Vm vm;
+			if (cl.getVmId() == -1) {
+				/** A verificação de limite de carga será adicionada aqui. */
+				Log.printConcatLine(totalClsLength * workloadPerVm.get(vmIndex));
+				if (vmAtualLoad < (totalClsLength * workloadPerVm.get(vmIndex))) {
+					vm = getVmsCreatedList().get(vmIndex);
+				} else {
+					Log.printConcatLine("Entrei aqui.");
+					vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
+					vmAtualLoad = 0;
+					continue;
+				}
+			} else {
+				vm = VmList.getById(getVmsCreatedList(), cl.getVmId());
+				if (vm == null) { // vm was not created
+					if(!Log.isDisabled()) {				    
+					    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Postponing execution of cloudlet ",
+							cl.getCloudletId(), ": bount VM not available");
+					}
+					continue;
+				}
+
+				cl.setVmId(vm.getId());
+				sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cl);
+				cloudletsSubmitted++;
+				getCloudletSubmittedList().add(cl);
+				vmAtualLoad += cl.getCloudletTotalLength();
+				successfullySubmitted.add(cl);
+
+			}
+		}
+		// Laço o
+		/*for (Cloudlet cloudlet : getCloudletList()) {
 			Vm vm;
 			// if user didn't bind this cloudlet and it has not been executed yet
 			if (cloudlet.getVmId() == -1) {
@@ -377,7 +444,7 @@ public class DatacenterBrokerLB extends SimEntity {
 			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
 			getCloudletSubmittedList().add(cloudlet);
 			successfullySubmitted.add(cloudlet);
-		}
+		}*/
 
 		// remove submitted cloudlets from waiting list
 		getCloudletList().removeAll(successfullySubmitted);

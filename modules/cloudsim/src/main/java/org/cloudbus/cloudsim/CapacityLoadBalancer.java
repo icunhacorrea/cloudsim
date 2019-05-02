@@ -4,14 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudbus.cloudsim.lists.CloudletList;
-import org.cloudbus.cloudsim.lists.VmList;
 
 public class CapacityLoadBalancer {
-
-	private long cloudletsTotalLength;
-
-	private Map<Integer, Long> loadToVm;
 
 	protected List<? extends Cloudlet> cloudletList;
 
@@ -19,10 +13,9 @@ public class CapacityLoadBalancer {
 
 
 	public CapacityLoadBalancer(List<? extends Cloudlet> cloudletList,
-		List<? extends Vm> vmList) throws Exception {
+		List<? extends Vm> vmList) {
 		setVmList(vmList);
 		setCloudletList(cloudletList);
-		setLoadToVm(new HashMap<Integer, Long>());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -43,15 +36,6 @@ public class CapacityLoadBalancer {
 		this.cloudletList = cloudletList;
 	}
 
-	@SuppressWarnings("unchecked")
-	public Map<Integer, Long> getLoadToVm () {
-		return loadToVm;
-	}
-
-	protected void setLoadToVm(Map<Integer, Long> loadToVm) {
-		this.loadToVm = loadToVm;
-	}
-
 	protected long getTotalLengthOfCloudlets() {
 		long totalLength = 0;
 
@@ -62,11 +46,17 @@ public class CapacityLoadBalancer {
 		return totalLength;
 	}
 
-	protected Map<Integer, Long> findVmProcessLimit() {
-		long 
+	protected Map<Integer, Double> findVmProcessLimit() {
+		Map<Integer, Double> workloadPerVm = new HashMap<Integer, Double>();
+		double valuePerVm = 0;
+		long totalVmMips = 0;
+		for (Vm vm : vmList)
+			totalVmMips += vm.getMips();
 		for (Vm vm : vmList) {
-
+			valuePerVm = vm.getMips() / (double) totalVmMips;
+			workloadPerVm.put(vm.getId(), valuePerVm);
 		}
+		return workloadPerVm;
 	}
 
 }
