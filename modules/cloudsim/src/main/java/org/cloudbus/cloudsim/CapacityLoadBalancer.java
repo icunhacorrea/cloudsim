@@ -11,11 +11,17 @@ public class CapacityLoadBalancer {
 
 	protected List<? extends Vm> vmList;
 
+	protected long totalCLsLength;
+
+	protected Map<Integer, Double> workloadPerVm;
+
 
 	public CapacityLoadBalancer(List<? extends Cloudlet> cloudletList,
 		List<? extends Vm> vmList) {
 		setVmList(vmList);
 		setCloudletList(cloudletList);
+		setTotalCLsLength();
+		this.workloadPerVm = findVmProcessLimit();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -37,13 +43,16 @@ public class CapacityLoadBalancer {
 	}
 
 	protected long getTotalLengthOfCloudlets() {
-		long totalLength = 0;
+		return totalCLsLength;
+	}
 
-		for (Cloudlet cl : cloudletList) {
-			totalLength += cl.getCloudletTotalLength();
+	protected long setTotalCLsLength() {
+		for (Cloudlet cl : cloudletList)
+			this.totalCLsLength += cl.getCloudletTotalLength();
+	}
 
-		}
-		return totalLength;
+	protected long getTotalCLsLength() {
+		return totalCLsLength;
 	}
 
 	protected Map<Integer, Double> findVmProcessLimit() {
@@ -57,6 +66,10 @@ public class CapacityLoadBalancer {
 			workloadPerVm.put(vm.getId(), valuePerVm);
 		}
 		return workloadPerVm;
+	}
+
+	protected boolean verifyLoadVm(long vmAtualLoad, ) {
+
 	}
 
 }

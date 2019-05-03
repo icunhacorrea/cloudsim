@@ -372,14 +372,7 @@ public class DatacenterBrokerLB extends SimEntity {
 
 		Map<Integer, Double> workloadPerVm = loadBalancer.findVmProcessLimit();
 
-		for (Vm vm : getVmsCreatedList()) {
-			if (!Log.isDisabled()) {
-				Log.printConcatLine("VM: ", vm.getId(), " capacity limit is:",
-					workloadPerVm.get(vm.getId()));
-			}			
-		}
-
-		int vmIndex = 0;
+		int vmIndex = getVmsCreatedList().size();
 		long totalClsLength = loadBalancer.getTotalLengthOfCloudlets();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
 		long vmAtualLoad = 0;
@@ -388,14 +381,12 @@ public class DatacenterBrokerLB extends SimEntity {
 			Vm vm;
 			if (cl.getVmId() == -1) {
 				/** A verificação de limite de carga será adicionada aqui. */
-				Log.printConcatLine(totalClsLength * workloadPerVm.get(vmIndex));
 				if (vmAtualLoad < (totalClsLength * workloadPerVm.get(vmIndex))) {
 					vm = getVmsCreatedList().get(vmIndex);
 				} else {
-					Log.printConcatLine("Entrei aqui.");
 					vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
 					vmAtualLoad = 0;
-					continue;
+					vm = getVmsCreatedList().get(vmIndex);
 				}
 			} else {
 				vm = VmList.getById(getVmsCreatedList(), cl.getVmId());
@@ -406,46 +397,14 @@ public class DatacenterBrokerLB extends SimEntity {
 					}
 					continue;
 				}
-
-				cl.setVmId(vm.getId());
-				sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cl);
-				cloudletsSubmitted++;
-				getCloudletSubmittedList().add(cl);
-				vmAtualLoad += cl.getCloudletTotalLength();
-				successfullySubmitted.add(cl);
-
 			}
-		}
-		// Laço o
-		/*for (Cloudlet cloudlet : getCloudletList()) {
-			Vm vm;
-			// if user didn't bind this cloudlet and it has not been executed yet
-			if (cloudlet.getVmId() == -1) {
-				vm = getVmsCreatedList().get(vmIndex);
-			} else { // submit to the specific vm
-				vm = VmList.getById(getVmsCreatedList(), cloudlet.getVmId());
-				if (vm == null) { // vm was not created
-					if(!Log.isDisabled()) {				    
-					    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Postponing execution of cloudlet ",
-							cloudlet.getCloudletId(), ": bount VM not available");
-					}
-					continue;
-				}
-			}
-
-			if (!Log.isDisabled()) {
-			    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Sending cloudlet ",
-					cloudlet.getCloudletId(), " to VM #", vm.getId());
-			}
-			
-			cloudlet.setVmId(vm.getId());
-			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
+			cl.setVmId(vm.getId());
+			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cl);
 			cloudletsSubmitted++;
-			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
-			getCloudletSubmittedList().add(cloudlet);
-			successfullySubmitted.add(cloudlet);
-		}*/
-
+			getCloudletSubmittedList().add(cl);
+			vmAtualLoad += cl.getCloudletTotalLength();
+			successfullySubmitted.add(cl);
+		}
 		// remove submitted cloudlets from waiting list
 		getCloudletList().removeAll(successfullySubmitted);
 	}
