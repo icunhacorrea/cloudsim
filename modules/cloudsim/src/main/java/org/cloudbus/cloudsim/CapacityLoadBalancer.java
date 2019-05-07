@@ -67,4 +67,9 @@ public class CapacityLoadBalancer {
 		}
 		return workloadPerVm;
 	}
+
+	protected boolean verifyLoadVm(long vmAtualLoad) {
+		return false;
+	}
+
 }

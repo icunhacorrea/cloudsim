@@ -372,7 +372,7 @@ public class DatacenterBrokerLB extends SimEntity {
 
 		Map<Integer, Double> workloadPerVm = loadBalancer.findVmProcessLimit();
 
-		int vmIndex = getVmsCreatedList().size();
+		int vmIndex = 0;
 		long totalClsLength = loadBalancer.getTotalLengthOfCloudlets();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
 		long vmAtualLoad = 0;
