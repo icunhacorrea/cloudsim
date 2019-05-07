@@ -46,7 +46,7 @@ public class CapacityLoadBalancer {
 		return totalCLsLength;
 	}
 
-	protected long setTotalCLsLength() {
+	protected void setTotalCLsLength() {
 		for (Cloudlet cl : cloudletList)
 			this.totalCLsLength += cl.getCloudletTotalLength();
 	}
@@ -67,9 +67,4 @@ public class CapacityLoadBalancer {
 		}
 		return workloadPerVm;
 	}
-
-	protected boolean verifyLoadVm(long vmAtualLoad, ) {
-
-	}
-
 }
