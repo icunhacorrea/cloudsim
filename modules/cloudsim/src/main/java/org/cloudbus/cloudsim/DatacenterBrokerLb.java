@@ -29,7 +29,7 @@ import org.cloudbus.cloudsim.lists.VmList;
  * @author Anton Beloglazov
  * @since CloudSim Toolkit 1.0
  */
-public class DatacenterBrokerLB extends SimEntity {
+public class DatacenterBrokerLb extends SimEntity {
 
 	/** The list of VMs submitted to be managed by the broker. */
 	protected List<? extends Vm> vmList;
@@ -75,6 +75,8 @@ public class DatacenterBrokerLB extends SimEntity {
          * is a datacenter id and each value is its characteristics.. */
 	protected Map<Integer, DatacenterCharacteristics> datacenterCharacteristicsList;
 
+	protected CapacityLoadBalancer loadBalancer;
+
 	/**
 	 * Objeto para auxiliar no balanceamento de carga.
 	 * @param name
@@ -89,7 +91,7 @@ public class DatacenterBrokerLB extends SimEntity {
 	 * @pre name != null
 	 * @post $none
 	 */
-	public DatacenterBrokerLB(String name) throws Exception {
+	public DatacenterBrokerLb(String name) throws Exception {
 		super(name);
 
 		setVmList(new ArrayList<Vm>());
@@ -108,6 +110,7 @@ public class DatacenterBrokerLB extends SimEntity {
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 
+		loadBalancer = new CapacityLoadBalancer(cloudletList, vmList);
 	}
 
 	/**
@@ -284,6 +287,10 @@ public class DatacenterBrokerLB extends SimEntity {
 		Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Cloudlet ", cloudlet.getCloudletId(),
 				" received");
 		cloudletsSubmitted--;
+
+
+
+
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": All Cloudlets executed. Finishing...");
 			clearDatacenters();
@@ -366,18 +373,13 @@ public class DatacenterBrokerLB extends SimEntity {
 	 */
 
 	protected void submitCloudlets() {
-		List<Cloudlet> cloudlets = getCloudletList();
-		List<Vm> vms = getVmsCreatedList();
-		CapacityLoadBalancer loadBalancer = new CapacityLoadBalancer(cloudlets, vms);
-
-		Map<Integer, Double> workloadPerVm = loadBalancer.findVmProcessLimit();
-
-		int vmIndex = 0;
+		Map<Integer, Double> workloadPerVm = loadBalancer.getWorkloadPerVm();
 		long totalClsLength = loadBalancer.getTotalLengthOfCloudlets();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
-		long vmAtualLoad = 0;
 		
-		for (Cloudlet cl : cloudlets) {
+		long vmAtualLoad = 0;
+		int vmIndex = 0;	
+		for (Cloudlet cl : getCloudletList()) {
 			Vm vm;
 			if (cl.getVmId() == -1) {
 				/** A verificação de limite de carga será adicionada aqui. */
@@ -684,5 +686,4 @@ public class DatacenterBrokerLB extends SimEntity {
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
 	}
-
 }

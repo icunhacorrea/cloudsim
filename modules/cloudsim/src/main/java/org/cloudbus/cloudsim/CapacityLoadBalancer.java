@@ -21,7 +21,7 @@ public class CapacityLoadBalancer {
 		setVmList(vmList);
 		setCloudletList(cloudletList);
 		setTotalCLsLength();
-		this.workloadPerVm = findVmProcessLimit();
+		setWorkloadPerVm();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -55,8 +55,12 @@ public class CapacityLoadBalancer {
 		return totalCLsLength;
 	}
 
-	protected Map<Integer, Double> findVmProcessLimit() {
-		Map<Integer, Double> workloadPerVm = new HashMap<Integer, Double>();
+	protected Map<Integer, Double> getWorkloadPerVm() {
+		return workloadPerVm;
+	}
+
+	protected void setWorkloadPerVm() {
+		workloadPerVm = new HashMap<Integer, Double>();
 		double valuePerVm = 0;
 		long totalVmMips = 0;
 		for (Vm vm : vmList)
@@ -65,10 +69,10 @@ public class CapacityLoadBalancer {
 			valuePerVm = vm.getMips() / (double) totalVmMips;
 			workloadPerVm.put(vm.getId(), valuePerVm);
 		}
-		return workloadPerVm;
 	}
 
 	protected boolean verifyLoadVm(long vmAtualLoad) {
+		
 		return false;
 	}
 
