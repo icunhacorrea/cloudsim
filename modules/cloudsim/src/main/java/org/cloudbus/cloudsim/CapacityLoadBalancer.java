@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.cloudbus.cloudsim.core.CloudSim;
+
 
 public class CapacityLoadBalancer {
 
@@ -71,8 +73,18 @@ public class CapacityLoadBalancer {
 		}
 	}
 
-	protected boolean verifyLoadVm(long vmAtualLoad) {
+	protected boolean verifyLoadVm(Vm vm, Map<Integer, Double> processedByVms) {
+		long processLength = 0;
+		int indexVm = vm.getId();
 		
+		List<ResCloudlet> resCloudletOfVm = vm.getCloudletScheduler().getCloudletFinishedList();
+		for (ResCloudlet resCl : resCloudletOfVm) {
+			processLength += resCl.getCloudletLength();
+		}
+
+		for (Map.Entry<Integer, Double> entry : processedByVms.entrySet()) {
+			System.out.println(entry.getKey() + "/" + entry.getValue());
+		}
 		return false;
 	}
 

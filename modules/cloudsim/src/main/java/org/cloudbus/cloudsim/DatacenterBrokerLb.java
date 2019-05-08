@@ -77,6 +77,8 @@ public class DatacenterBrokerLb extends SimEntity {
 
 	protected CapacityLoadBalancer loadBalancer;
 
+	protected Map<Integer, Double> processedByVms;
+
 	/**
 	 * Objeto para auxiliar no balanceamento de carga.
 	 * @param name
@@ -110,7 +112,7 @@ public class DatacenterBrokerLb extends SimEntity {
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 
-		loadBalancer = new CapacityLoadBalancer(cloudletList, vmList);
+		processedByVms = new HashMap<Integer, Double>();
 	}
 
 	/**
@@ -277,6 +279,15 @@ public class DatacenterBrokerLb extends SimEntity {
 	/**
 	 * Process a cloudlet return event.
 	 * 
+	 * Metódo responsável por processar o retorno de uma determinada Cloudlet.
+	 * As alterações aqui compreendem avaliar se uma Vm está operando a menos de 1/3
+	 * de sua capacidade definida no objeto loadBalancer.
+	 * 
+	 * Se a afirmação for positiva e houver cloudlets a serem "roubadas" de outra VM,
+	 * então há o roubo. (priorizando a Vm com menos recurso do DataCenter).
+	 * 
+	 * 1⁰ Tentativa: Só roubar uma Cloudlet que esteja na fila de espera da Vm mais lenta.
+	 * 
 	 * @param ev a SimEvent object
 	 * @pre ev != $null
 	 * @post $none
@@ -288,8 +299,17 @@ public class DatacenterBrokerLb extends SimEntity {
 				" received");
 		cloudletsSubmitted--;
 
+		// Adição das verificações
+		Vm vm = vmList.get(cloudlet.getVmId()); // Busca da Vm que executou a Cloudlet.
+		// Atualização do HashMap que indica quanto cada Vm já processou.
+		if (processedByVms.get(vm.getId()) == null) {
+			processedByVms.put(vm.getId(), (double) cloudlet.getCloudletTotalLength());
+		} else {
+			processedByVms.put(vm.getId(), processedByVms.get(vm.getId()) +
+				cloudlet.getCloudletTotalLength());
+		}
 
-
+		boolean stealCl = loadBalancer.verifyLoadVm(vm, processedByVms);
 
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": All Cloudlets executed. Finishing...");
@@ -373,6 +393,10 @@ public class DatacenterBrokerLb extends SimEntity {
 	 */
 
 	protected void submitCloudlets() {
+		if (getCloudletList().size() != 0 && getVmList().size() != 0) {
+			this.loadBalancer = new CapacityLoadBalancer(cloudletList, vmList);
+		}
+
 		Map<Integer, Double> workloadPerVm = loadBalancer.getWorkloadPerVm();
 		long totalClsLength = loadBalancer.getTotalLengthOfCloudlets();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
