@@ -77,7 +77,7 @@ public class DatacenterBrokerLb extends SimEntity {
 
 	protected CapacityLoadBalancer loadBalancer;
 
-	protected Map<Integer, Double> processedByVms;
+	protected Map<Integer, Long> processedByVms;
 
 	/**
 	 * Objeto para auxiliar no balanceamento de carga.
@@ -112,7 +112,7 @@ public class DatacenterBrokerLb extends SimEntity {
 		setVmsToDatacentersMap(new HashMap<Integer, Integer>());
 		setDatacenterCharacteristicsList(new HashMap<Integer, DatacenterCharacteristics>());
 
-		processedByVms = new HashMap<Integer, Double>();
+		processedByVms = new HashMap<Integer, Long>();
 	}
 
 	/**
@@ -303,13 +303,13 @@ public class DatacenterBrokerLb extends SimEntity {
 		Vm vm = vmList.get(cloudlet.getVmId()); // Busca da Vm que executou a Cloudlet.
 		// Atualização do HashMap que indica quanto cada Vm já processou.
 		if (processedByVms.get(vm.getId()) == null) {
-			processedByVms.put(vm.getId(), (double) cloudlet.getCloudletTotalLength());
+			processedByVms.put(vm.getId(), cloudlet.getCloudletTotalLength());
 		} else {
 			processedByVms.put(vm.getId(), processedByVms.get(vm.getId()) +
 				cloudlet.getCloudletTotalLength());
 		}
 
-		boolean stealCl = loadBalancer.verifyLoadVm(vm, processedByVms);
+		boolean stealCl = loadBalancer.verifyLoadVm(vm.getId(), processedByVms.get(vm.getId()));
 
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": All Cloudlets executed. Finishing...");
