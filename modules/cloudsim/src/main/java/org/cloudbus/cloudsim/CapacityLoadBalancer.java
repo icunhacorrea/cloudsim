@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.cloudbus.cloudsim.core.CloudSim;
-
-
 public class CapacityLoadBalancer {
 
 	protected List<? extends Cloudlet> cloudletList;
@@ -82,28 +79,28 @@ public class CapacityLoadBalancer {
 	 * 
 	 */
 	protected boolean verifyLoadVm(int vmId, long processedByVm) {
-		//long processLength = 0;
-		//int indexVm = vm.getId();
-		
-		/*List<ResCloudlet> resCloudletOfVm = vm.getCloudletScheduler().getCloudletFinishedList();
-		for (ResCloudlet resCl : resCloudletOfVm) {
-			processLength += resCl.getCloudletLength();
-		}
-		for (Map.Entry<Integer, Long> entry : processedByVms.entrySet()) {
-			Log.printConcatLine("Id:", entry.getKey(), "/", "Processed:",
-			entry.getValue());
-		}*/
-
 		double workLoadOfVm = workloadPerVm.get(vmId) * (double) totalCLsLength;
-
-		Log.printConcatLine("Quanto deve processar: ", (processedByVm / workLoadOfVm));
-		Log.printConcatLine("Quanto foi processado: ", (0.666666667 * workLoadOfVm));
-
-		if ((processedByVm / workLoadOfVm) > (0.666666667 * workLoadOfVm)) {
-			Log.printConcatLine("Vm ", vmId, " Pode roubar Cloudlets.");
+		// Se a Vm já processou 2/3 do que deve processar OU sua lista de cloudlets em
+		// espera está vazia.
+		if (processedByVm > (0.75 * workLoadOfVm) || 
+			vmList.get(vmId).getCloudletScheduler().getCloudletWaitingList().size() == 0) {
 			return true;
 		}
 		return false;
 	}
 
+	protected int[] findVmToSteal(int vmDestId) {
+		int arr[] = {-1, -1};
+		double mipsDestVm = vmList.get(vmDestId).getMips();
+		List <ResCloudlet> waitingList;
+		for (Vm vm : vmList) {
+			if (vm.getCloudletScheduler().getCloudletWaitingList().size() > 0 &&
+				vm.getMips() < mipsDestVm) {
+				waitingList = vm.getCloudletScheduler().getCloudletWaitingList();
+				arr[0] = vm.getId();
+				arr[1] = waitingList.get(0).getCloudletId();
+			}
+		}
+		return arr;
+	}
 }
