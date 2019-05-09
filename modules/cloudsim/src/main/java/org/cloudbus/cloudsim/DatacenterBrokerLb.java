@@ -325,14 +325,7 @@ public class DatacenterBrokerLb extends SimEntity {
 			arrMove[2] = stealPack[0];
 			arrMove[3] = vm.getId();
 			arrMove[4] = vmsToDatacentersMap.get(vm.getId());
-
-			// Log para averiguar se as cloudlets estarão sendo roubadas certamente.
-			Log.printConcatLine("*********** Roubo de Cloudlet **************");
-			Log.printConcatLine("Cloudlet [ ", arrMove[0], " ]");
-			Log.printConcatLine("Vm ORIGEM [ ", arrMove[2], " ]");
-			Log.printConcatLine("Vm DESTINO [ ", arrMove[3], " ]");
-			Log.printConcatLine("*****************************");
-
+			// Send cloudlet to other Vm.
 			sendNow(arrMove[4], CloudSimTags.CLOUDLET_MOVE, arrMove);
 		}
 
