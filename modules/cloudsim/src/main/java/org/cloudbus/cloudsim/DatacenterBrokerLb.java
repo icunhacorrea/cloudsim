@@ -318,7 +318,7 @@ public class DatacenterBrokerLb extends SimEntity {
 		if (stealCl)
 			stealPack = loadBalancer.findVmToSteal(vm.getId());
 		
-		// Se houver uma cloudlets na lista de espera da Vm
+		// Se houver uma cloudlets na lista de espera da Vm alvo
 		if (stealPack[0] != -1) {
 			arrMove[0] = stealPack[1]; // Id da Cloudlet a ser roubada
 			arrMove[1] = getId(); // Id do broker que deseja mover a cloudlet.
@@ -443,7 +443,7 @@ public class DatacenterBrokerLb extends SimEntity {
 				}
 			}
 			cl.setVmId(vm.getId());
-			sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cl);
+			send(getVmsToDatacentersMap().get(vm.getId()), cl.getSubmissionDelay(), CloudSimTags.CLOUDLET_SUBMIT, cl);
 			cloudletsSubmitted++;
 			getCloudletSubmittedList().add(cl);
 			vmAtualLoad += cl.getCloudletTotalLength();

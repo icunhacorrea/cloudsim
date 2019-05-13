@@ -244,6 +244,8 @@ public class Cloudlet {
      */
     private List<String> requiredFiles = null;
 
+    private double submissionDelay;
+
     /**
      * Allocates a new Cloudlet object. The Cloudlet length, input and output
      * file sizes should be greater than or equal to 1. By default this
@@ -290,6 +292,58 @@ public class Cloudlet {
         accumulatedBwCost = 0;
         costPerBw = 0;
         requiredFiles = new LinkedList<String>();
+    }
+
+    /**
+     * Allocates a new Cloudlet object. The Cloudlet length, input and output
+     * file sizes should be greater than or equal to 1. By default this
+     * constructor sets the history of this object.
+     *
+     * @param cloudletId the unique ID of this Cloudlet
+     * @param cloudletLength the length or size (in MI) of this cloudlet to be
+     * executed in a PowerDatacenter
+     * @param cloudletFileSize the file size (in byte) of this cloudlet
+     * <tt>BEFORE</tt> submitting to a Datacenter
+     * @param cloudletOutputSize the file size (in byte) of this cloudlet
+     * <tt>AFTER</tt> finish executing by a Datacenter
+     * @param pesNumber the pes number
+     * @param submssionDelay delay de submissão de uma cloudlet
+     * @param utilizationModelCpu the utilization model of cpu
+     * @param utilizationModelRam the utilization model of ram
+     * @param utilizationModelBw the utilization model of bw
+     *
+     * @pre cloudletID >= 0
+     * @pre cloudletLength >= 0.0
+     * @pre cloudletFileSize >= 1
+     * @pre cloudletOutputSize >= 1
+     * @post $none
+     */
+    public Cloudlet(
+            final int cloudletId,
+            final long cloudletLength,
+            final int pesNumber,
+            final long cloudletFileSize,
+            final long cloudletOutputSize,
+            final double submissionDelay,
+            final UtilizationModel utilizationModelCpu,
+            final UtilizationModel utilizationModelRam,
+            final UtilizationModel utilizationModelBw) {
+        this(
+                cloudletId,
+                cloudletLength,
+                pesNumber,
+                cloudletFileSize,
+                cloudletOutputSize,
+                utilizationModelCpu,
+                utilizationModelRam,
+                utilizationModelBw,
+                false);
+        vmId = -1;        
+        accumulatedBwCost = 0;
+        costPerBw = 0;
+        requiredFiles = new LinkedList<String>();
+
+        this.submissionDelay = submissionDelay;
     }
 
     /**
@@ -1634,4 +1688,11 @@ public class Cloudlet {
         return getUtilizationModelBw().getUtilization(time);
     }
 
+    public void setSubmissionDelay(final double submissionDelay) {
+        this.submissionDelay = submissionDelay;
+    }
+
+    public double getSubmissionDelay() {
+        return submissionDelay;
+    }
 }
