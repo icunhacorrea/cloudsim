@@ -924,10 +924,6 @@ public class Datacenter extends SimEntity {
 	 * @pre $none
 	 * @post $none
 	 */
-
-	 /**
-	  * Alterar tal método para que após atualizar 
-	  */
 	protected void checkCloudletCompletion() {
 		List<? extends Host> list = getVmAllocationPolicy().getHostList();
 		for (int i = 0; i < list.size(); i++) {
