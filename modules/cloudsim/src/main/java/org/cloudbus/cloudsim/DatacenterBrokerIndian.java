@@ -350,50 +350,47 @@ public class DatacenterBrokerIndian extends SimEntity {
          * @see #submitCloudletList(java.util.List) 
 	 */
 	protected void submitCloudlets() {
+		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
+		List<Cloudlet> cloudletsList = new ArrayList<Cloudlet>();
+		List<Vm> vmList = new ArrayList<Vm>();
+		cloudletsList = getCloudletList();
+		vmList = getVmsCreatedList();
+		Collections.sort(cloudletsList, new CompareCloudlet());
+		Collections.sort(vmList, new CompareVm());
+
+		Collections.reverse(cloudletsList);
+		Collections.reverse(vmList);
+
+		int clByVm = cloudletList.size() / vmList.size();
 		int vmIndex = 0;
-        List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
-        List<Cloudlet> cloudletsList = new ArrayList<Cloudlet>();
-        List<Vm> vmList = new ArrayList<Vm>();
-        cloudletsList = getCloudletList();
-        vmList = getVmsCreatedList();
-        Collections.sort(cloudletsList, new CompareCloudlet());
-        Collections.sort(vmList, new CompareVm());
-
-        int clByVm = cloudletList.size() / vmList.size();
-
-        /**
-         * Laço de distribuição de Cloudlets diferente, irá percorrer
-         * o array de cloudlets pela quantidade e distribuindo até  elas acabarem.
-         * 
-         * while ou for?
-         */
-
+		int countCls = 0;
 		for (Cloudlet cloudlet : cloudletsList) {
 			Vm vm;
-			// if user didn't bind this cloudlet and it has not been executed yet
 			if (cloudlet.getVmId() == -1) {
-				vm = getVmsCreatedList().get(vmIndex);
+				vm = vmList.get(vmIndex);
 			} else { // submit to the specific vm
 				vm = VmList.getById(getVmsCreatedList(), cloudlet.getVmId());
 				if (vm == null) { // vm was not created
 					if(!Log.isDisabled()) {				    
-					    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Postponing execution of cloudlet ",
+							Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Postponing execution of cloudlet ",
 							cloudlet.getCloudletId(), ": bount VM not available");
 					}
 					continue;
 				}
 			}
-
 			if (!Log.isDisabled()) {
-			    Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Sending cloudlet ",
+					Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": Sending cloudlet ",
 					cloudlet.getCloudletId(), " to VM #", vm.getId());
 			}
-			
 			cloudlet.setVmId(vm.getId());
 			//sendNow(getVmsToDatacentersMap().get(vm.getId()), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			send(getVmsToDatacentersMap().get(vm.getId()), cloudlet.getSubmissionDelay(), CloudSimTags.CLOUDLET_SUBMIT, cloudlet);
 			cloudletsSubmitted++;
-			vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
+			countCls++;
+			if (countCls >= clByVm) {
+				vmIndex = (vmIndex + 1) % getVmsCreatedList().size();
+				countCls = 0;
+			}
 			getCloudletSubmittedList().add(cloudlet);
 			successfullySubmitted.add(cloudlet);
 		}
@@ -680,13 +677,13 @@ public class DatacenterBrokerIndian extends SimEntity {
 }
 
 class CompareCloudlet implements Comparator<Cloudlet> {
-    public int compare(Cloudlet cl1, Cloudlet cl2) {
-        return Long.compare(cl1.getCloudletTotalLength(), cl2.getCloudletTotalLength());
-    }
+	public int compare(Cloudlet cl1, Cloudlet cl2) {
+			return Long.compare(cl1.getCloudletTotalLength(), cl2.getCloudletTotalLength());
+	}
 }
 
 class CompareVm implements Comparator<Vm> {
-    public int compare(Vm vm1, Vm vm2) {
-        return Double.compare(vm1.getMips(), vm2.getMips());
-    }
+	public int compare(Vm vm1, Vm vm2) {
+			return Double.compare(vm1.getMips(), vm2.getMips());
+	}
 }
