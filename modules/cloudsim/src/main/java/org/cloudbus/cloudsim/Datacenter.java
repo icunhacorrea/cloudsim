@@ -665,6 +665,7 @@ public class Datacenter extends SimEntity {
 					// time to transfer the files
 					double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
 					vm.getCloudletScheduler().cloudletSubmit(cl, fileTransferTime);
+					Log.printConcatLine("Penalidade de migração (File Transfer Time): ", fileTransferTime);
 				}
 			} else {// the cloudlet will migrate from one resource to another
 				int tag = ((type == CloudSimTags.CLOUDLET_MOVE_ACK) ? CloudSimTags.CLOUDLET_SUBMIT_ACK
