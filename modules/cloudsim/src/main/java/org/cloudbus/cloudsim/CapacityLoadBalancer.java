@@ -80,7 +80,7 @@ public class CapacityLoadBalancer {
 	 */
 	protected boolean verifyLoadVm(int vmId, long processedByVm) {
 		double workLoadOfVm = workloadPerVm.get(vmId) * (double) totalCLsLength;
-		// Se a Vm já processou 2/3 do que deve processar OU sua lista de cloudlets em
+		// Se a Vm já processou 3/4 do que deve processar OU sua lista de cloudlets em
 		// espera está vazia.
 		if (processedByVm > (0.75 * workLoadOfVm) || 
 			vmList.get(vmId).getCloudletScheduler().getCloudletWaitingList().size() == 0) {

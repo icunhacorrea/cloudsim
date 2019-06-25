@@ -59,6 +59,8 @@ public class Datacenter extends SimEntity {
 	/** The scheduling delay to process each datacenter received event. */
 	private double schedulingInterval;
 
+	private double migrateCost;
+
 	/**
 	 * Allocates a new Datacenter object.
 	 * 
@@ -94,6 +96,8 @@ public class Datacenter extends SimEntity {
 		setStorageList(storageList);
 		setVmList(new ArrayList<Vm>());
 		setSchedulingInterval(schedulingInterval);
+
+		setMigrateCost(0);
 
 		for (Host host : getCharacteristics().getHostList()) {
 			host.setDatacenter(this);
@@ -664,6 +668,8 @@ public class Datacenter extends SimEntity {
 				} else {
 					// time to transfer the files
 					double fileTransferTime = predictFileTransferTime(cl.getRequiredFiles());
+					double tmpCost = getMigrateCost();
+					setMigrateCost(tmpCost + fileTransferTime);
 					vm.getCloudletScheduler().cloudletSubmit(cl, fileTransferTime);
 					Log.printConcatLine("Penalidade de migração (File Transfer Time): ", fileTransferTime);
 				}
@@ -1197,6 +1203,14 @@ public class Datacenter extends SimEntity {
 	 */
 	protected void setSchedulingInterval(double schedulingInterval) {
 		this.schedulingInterval = schedulingInterval;
+	}
+
+	public void setMigrateCost(double migrateCost) {
+		this.migrateCost = migrateCost;
+	}
+
+	public double getMigrateCost() {
+		return migrateCost;
 	}
 
 }
