@@ -89,6 +89,13 @@ public class CapacityLoadBalancer {
 		return false;
 	}
 
+
+	/**
+	 * To do: Alterar método para que ele faça toda a preparação de um stealPack.
+	 * 
+	 * @param vmDestId
+	 * @return
+	 */
 	protected int[] findVmToSteal(int vmDestId) {
 		int arr[] = {-1, -1};
 		double mipsDestVm = vmList.get(vmDestId).getMips();
@@ -97,10 +104,37 @@ public class CapacityLoadBalancer {
 			if (vm.getCloudletScheduler().getCloudletWaitingList().size() > 0 &&
 				vm.getMips() < mipsDestVm) {
 				waitingList = vm.getCloudletScheduler().getCloudletWaitingList();
-				arr[0] = vm.getId();
+				arr[0] = vm.getId();      // VM emissora
 				arr[1] = waitingList.get(0).getCloudletId();
 			}
 		}
+		return arr;
+	}
+
+	/**
+	 * Método repsonsável por identificar uma Vm emissora de Cloudlets, bem como
+	 * uma Cloudlet na sua lista de espera.
+	 * 
+	 * @param vmDestId VM destino para a carga de trabalho
+	 * @param brokerId User responsável pela troca.
+	 * @param dcId     Id do datacenter onde que receberá a nova carga de trabalho
+	 * @param 
+	 */
+	protected int[] prepareStealPack(int vmDestId, int brokerId, int dcId) {
+		int arr[] = {-1, -1, -1, -1, -1};
+		double mipsDestVm = vmList.get(vmDestId).getMips();
+		List <ResCloudlet> waitingList;
+		for (Vm vm : vmList) {
+			if (vm.getCloudletScheduler().getCloudletWaitingList().size() > 0 &&
+				vm.getMips() < mipsDestVm) {
+				waitingList = vm.getCloudletScheduler().getCloudletWaitingList();
+				arr[2] = vm.getId();      // VM emissora
+				arr[0] = waitingList.get(0).getCloudletId();
+			}
+		}
+		arr[1] = brokerId;
+		arr[3] = vmDestId;
+		arr[4] = dcId;
 		return arr;
 	}
 }

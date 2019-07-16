@@ -335,7 +335,7 @@ public class CloudletSchedulerSpaceShared extends CloudletScheduler {
 		length += extraSize;
 		cloudlet.setCloudletLength(length);
 
-
+		Log.printConcatLine("File transfer Time: ", fileTransferTime);
 		Log.printConcatLine("Capacity: " + capacity);
 		Log.printConcatLine("Extrasize: " + extraSize);
 		Log.printConcatLine("Cpus: " + cpus);

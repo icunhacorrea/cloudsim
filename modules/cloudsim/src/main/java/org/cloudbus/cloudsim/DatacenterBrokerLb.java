@@ -302,8 +302,7 @@ public class DatacenterBrokerLb extends SimEntity {
 		// Adição das verificações
 		Vm vm = vmList.get(cloudlet.getVmId()); // Busca da Vm que executou a Cloudlet.
 		boolean stealCl = false;
-		int stealPack[] = {-1, -1};
-		int arrMove[] = {-1, -1, -1, -1, -1};
+		int stealPack[] = {-1 , -1, -1, -1, -1};
 
 		// Atualização do HashMap que indica quanto cada Vm já processou.
 		if (processedByVms.get(vm.getId()) == null) {
@@ -315,19 +314,13 @@ public class DatacenterBrokerLb extends SimEntity {
 
 		stealCl = loadBalancer.verifyLoadVm(vm.getId(), processedByVms.get(vm.getId()));
 
-		if (stealCl)
-			stealPack = loadBalancer.findVmToSteal(vm.getId());
+		if (stealCl) 
+			stealPack = loadBalancer.prepareStealPack(vm.getId(), getId(), 
+				vmsToDatacentersMap.get(vm.getId()));
 		
 		// Se houver uma cloudlets na lista de espera da Vm alvo
-		if (stealPack[0] != -1) {
-			arrMove[0] = stealPack[1]; // Id da Cloudlet a ser roubada
-			arrMove[1] = getId(); // Id do broker que deseja mover a cloudlet.
-			arrMove[2] = stealPack[0];
-			arrMove[3] = vm.getId();
-			arrMove[4] = vmsToDatacentersMap.get(vm.getId());
-			// Send cloudlet to other Vm.
-			sendNow(arrMove[4], CloudSimTags.CLOUDLET_MOVE, arrMove);
-		}
+		if (stealPack[0] != -1)
+			sendNow(stealPack[4], CloudSimTags.CLOUDLET_MOVE, stealPack);
 
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": All Cloudlets executed. Finishing...");
