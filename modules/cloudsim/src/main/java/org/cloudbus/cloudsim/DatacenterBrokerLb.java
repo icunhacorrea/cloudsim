@@ -9,6 +9,8 @@
 package org.cloudbus.cloudsim;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -315,12 +317,21 @@ public class DatacenterBrokerLb extends SimEntity {
 		stealCl = loadBalancer.verifyLoadVm(vm.getId(), processedByVms.get(vm.getId()));
 
 		if (stealCl) 
-			stealPack = loadBalancer.prepareStealPack(vm.getId(), getId(), 
-				vmsToDatacentersMap.get(vm.getId()));
+			stealPack = loadBalancer.prepareStealPack(vm.getId(), getId());
 		
 		// Se houver uma cloudlets na lista de espera da Vm alvo
-		if (stealPack[0] != -1)
+		/** Passos para migrar Cloudlet Agora
+		 * 
+		 * 1⁰ Cancelar Cloudlet No escalonador da VM.
+		 * 2⁰ Criar uma cópiadestId aqui da cloudulet.
+		 * 3⁰ Submeter manualmente uma cloudlet no escalonador da VM alvo.
+		 * 
+		 */
+		
+		if (stealPack[0] != -1) {
+			stealPack[4] = vmsToDatacentersMap.get(stealPack[3]);
 			sendNow(stealPack[4], CloudSimTags.CLOUDLET_MOVE, stealPack);
+		}
 
 		if (getCloudletList().size() == 0 && cloudletsSubmitted == 0) { // all cloudlets executed
 			Log.printConcatLine(CloudSim.clock(), ": ", getName(), ": All Cloudlets executed. Finishing...");
@@ -333,7 +344,6 @@ public class DatacenterBrokerLb extends SimEntity {
 				clearDatacenters();
 				createVmsInDatacenter(0);
 			}
-
 		}
 	}
 
@@ -410,11 +420,15 @@ public class DatacenterBrokerLb extends SimEntity {
 
 		Map<Integer, Double> workloadPerVm = loadBalancer.getWorkloadPerVm();
 		long totalClsLength = loadBalancer.getTotalLengthOfCloudlets();
+		List<Cloudlet> cloudletsList = new ArrayList<Cloudlet>();
 		List<Cloudlet> successfullySubmitted = new ArrayList<Cloudlet>();
 		
+		cloudletsList = getCloudletList();
+		Collections.sort(cloudletsList, new CompareCloudlet());
+
 		long vmAtualLoad = 0;
-		int vmIndex = 0;	
-		for (Cloudlet cl : getCloudletList()) {
+		int vmIndex = 0;
+		for (Cloudlet cl : cloudletList) {
 			Vm vm;
 			if (cl.getVmId() == -1) {
 				/** A verificação de limite de carga será adicionada aqui. */
@@ -720,5 +734,11 @@ public class DatacenterBrokerLb extends SimEntity {
 	 */
 	protected void setDatacenterRequestedIdsList(List<Integer> datacenterRequestedIdsList) {
 		this.datacenterRequestedIdsList = datacenterRequestedIdsList;
+	}
+
+	class CompareCloudlet implements Comparator<Cloudlet> {
+		public int compare(Cloudlet cl1, Cloudlet cl2) {
+				return Long.compare(cl1.getCloudletTotalLength(), cl2.getCloudletTotalLength());
+		}
 	}
 }

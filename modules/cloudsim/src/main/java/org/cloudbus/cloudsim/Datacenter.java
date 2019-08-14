@@ -639,9 +639,11 @@ public class Datacenter extends SimEntity {
 		int vmDestId = array[3];
 		int destId = array[4];
 
+
 		// get the cloudlet
-		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId,userId)
+		Cloudlet cl = getVmAllocationPolicy().getHost(vmId, userId).getVm(vmId, userId)
 				.getCloudletScheduler().cloudletCancel(cloudletId);
+
 
 		boolean failed = false;
 		if (cl == null) {// cloudlet doesn't exist

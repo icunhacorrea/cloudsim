@@ -318,7 +318,7 @@ public class CloudletSchedulerSpaceShared extends CloudletScheduler {
 		double capacity = 0.0;
 		int cpus = 0;
 		for (Double mips : getCurrentMipsShare()) {
-			Log.printConcatLine("MIPS desse laço maldito: " + mips);
+			//Log.printConcatLine("MIPS desse laço maldito: " + mips);
 			capacity += mips;
 			if (mips > 0) {
 				cpus++;
@@ -335,12 +335,12 @@ public class CloudletSchedulerSpaceShared extends CloudletScheduler {
 		length += extraSize;
 		cloudlet.setCloudletLength(length);
 
-		Log.printConcatLine("File transfer Time: ", fileTransferTime);
+		/*Log.printConcatLine("File transfer Time: ", fileTransferTime);
 		Log.printConcatLine("Capacity: " + capacity);
 		Log.printConcatLine("Extrasize: " + extraSize);
 		Log.printConcatLine("Cpus: " + cpus);
 		Log.printConcatLine("Cloudlet: " + cloudlet.getCloudletId() + " Novo tamanho: " +
-			length);
+			length);*/
 
 		return cloudlet.getCloudletLength() / capacity;
 	}

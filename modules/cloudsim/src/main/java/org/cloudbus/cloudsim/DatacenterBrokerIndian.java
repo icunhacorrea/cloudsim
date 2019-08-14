@@ -355,11 +355,12 @@ public class DatacenterBrokerIndian extends SimEntity {
 		List<Vm> vmList = new ArrayList<Vm>();
 		cloudletsList = getCloudletList();
 		vmList = getVmsCreatedList();
+		
 		Collections.sort(cloudletsList, new CompareCloudlet());
 		Collections.sort(vmList, new CompareVm());
 
-		Collections.reverse(cloudletsList);
-		Collections.reverse(vmList);
+		//Collections.reverse(cloudletsList);
+		//Collections.reverse(vmList);
 
 		int clByVm = cloudletList.size() / vmList.size();
 		int vmIndex = 0;
